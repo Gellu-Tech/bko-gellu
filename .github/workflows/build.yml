@@ -1,0 +1,34 @@
+name: Generate a build and push to build branch
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Push dist to build branch
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: build
+          FOLDER: dist
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MESSAGE: "Build: ({sha}) {msg}"
